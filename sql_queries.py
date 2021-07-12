@@ -77,10 +77,10 @@ songplay_table_create = ("""
 CREATE TABLE  IF NOT EXISTS songplays (
     songplay_id INT IDENTITY(0,1) PRIMARY KEY SORTKEY DISTKEY,
     start_time TIMESTAMP NOT NULL,
-    user_id INT NOT NULL REFERENCES users(user_id),
+    user_id INT NOT NULL,
     level VARCHAR,
-    song_id VARCHAR NOT NULL REFERENCES songs(song_id),
-    artist_id VARCHAR NOT NULL REFERENCES artists(artist_id),
+    song_id VARCHAR NOT NULL,
+    artist_id VARCHAR NOT NULL,
     session_id INT,
     location VARCHAR,
     user_agent VARCHAR
@@ -103,7 +103,7 @@ song_table_create = ("""
 CREATE TABLE IF NOT EXISTS songs (
     song_id VARCHAR PRIMARY KEY SORTKEY,
     title VARCHAR NOT NULL,
-    artist_id VARCHAR NOT NULL REFERENCES artists(artist_id),
+    artist_id VARCHAR NOT NULL,
     year INT,
     duration FLOAT
     );
@@ -136,30 +136,38 @@ CREATE TABLE IF NOT EXISTS time (
 
 '''
 reference to deal with TIMEFORMAT & blank/empty value:
-https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-conversion.html
+- https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-conversion.html
+- epoch: date from which time is measured (January 1, 1970)
 '''
 
 # STAGING TABLES
 staging_events_copy = ("""
-COPY staging_events FROM '{}' 
+COPY staging_events FROM {} 
 CREDENTIALS 'aws_iam_role={}' 
 REGION '{}' 
-FORMAT AS JSON '{}' 
+FORMAT AS JSON {} 
 TIMEFORMAT AS 'epochmillisecs' 
 BLANKSASNULL 
 EMPTYASNULL 
 TRUNCATECOLUMNS;
-""").format(config['S3']['LOG_DATA'], config['IAM_ROLE']['ARN'], config['AWS']['REGION'], config['S3']['LOG_JSONPATH'])
+""").format(config.get("S3", "LOG_DATA"),
+            config.get("IAM_ROLE", "IAM_ROLE_ARN"),
+            config.get("CLUSTER", 'DWH_REGION'),
+            config.get("S3", "LOG_JSONPATH")
+            )
 
 staging_songs_copy = ("""
-COPY staging_songs FROM '{}' 
+COPY staging_songs FROM {} 
 CREDENTIALS 'aws_iam_role={}' 
 REGION '{}' 
 FORMAT AS JSON 'auto' 
 BLANKSASNULL 
 EMPTYASNULL 
 TRUNCATECOLUMNS;
-""").format(config['S3']['SONG_DATA'], config['IAM_ROLE']['ARN'], config['AWS']['REGION'])
+""").format(config.get('S3', 'SONG_DATA'),
+            config.get('IAM_ROLE', 'IAM_ROLE_ARN'),
+            config.get('CLUSTER', 'DWH_REGION')
+            )
 
 
 # FINAL TABLES
@@ -246,8 +254,11 @@ EXTRACT(dow FROM start_time) AS dow FROM
 # QUERY LISTS
 create_table_queries = [staging_events_table_create, staging_songs_table_create,
                     songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
-drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, 
+
+drop_table_queries = [staging_events_table_drop, staging_songs_table_drop,
                     songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
+
 copy_table_queries = [staging_events_copy, staging_songs_copy]
-insert_table_queries = [songplay_table_insert, 
+
+insert_table_queries = [songplay_table_insert,
                     user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
