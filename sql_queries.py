@@ -33,6 +33,7 @@ fact table: DISTKEY & SORTKEY set to be the same join-column so query optimizer/
 '''
 
 # CREATE TABLES
+# staging tables
 staging_events_table_create = ("""
 CREATE TABLE IF NOT EXISTS staging_events (
     artist VARCHAR,
@@ -72,6 +73,7 @@ CREATE TABLE IF NOT EXISTS staging_songs (
 """)
 
 
+# final tables
 # fact table
 songplay_table_create = ("""
 CREATE TABLE  IF NOT EXISTS songplays (
@@ -199,7 +201,7 @@ INSERT INTO users (
 )
 SELECT DISTINCT user_id, first_name, last_name, gender, level
 FROM staging_events
-WHERE page='NextSong' AND user_id IS NOT NULL;
+WHERE user_id IS NOT NULL;
 """)
 
 song_table_insert = ("""
@@ -221,7 +223,8 @@ INSERT INTO artists (
     name,
     location,
     latitude,
-    longitude)
+    longitude
+)
 SELECT DISTINCT artist_id, artist_name, artist_location, artist_latitude, artist_longitude
 FROM staging_songs
 WHERE artist_id IS NOT NULL;
@@ -240,14 +243,15 @@ INSERT INTO time (
 SELECT DISTINCT start_time,
 EXTRACT(hour FROM start_time) AS hour,
 EXTRACT(day FROM start_time) AS day,
-EXTRACT(WEEK FROM start_time) AS week,
-EXTRACT(month FROM start_time) AS month, EXTRACT(year from start_time) AS year,
-EXTRACT(dow FROM start_time) AS dow FROM
-    (SELECT DISTINCT ts AS start_time
-    FROM staging_events AS s_e
-    JOIN staging_songs AS s_s
-    ON (s_e.song = s_s.title AND s_e.artist = s_s.artist_name)
-    WHERE s_e.page='NextSong');
+EXTRACT(week FROM start_time) AS week,
+EXTRACT(month FROM start_time) AS month, 
+EXTRACT(year from start_time) AS year,
+EXTRACT(dow FROM start_time) AS dow 
+FROM (SELECT DISTINCT ts AS start_time 
+FROM staging_events AS s_e 
+JOIN staging_songs AS s_s 
+ON (s_e.song = s_s.title AND s_e.artist = s_s.artist_name) 
+WHERE s_e.page='NextSong');
 """)
 
 
