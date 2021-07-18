@@ -51,7 +51,7 @@ sparkify-postgres
 ![Schema](https://github.com/abreufreire/sparkify-redshift/blob/master/graphics/stag_prod_tables.png)
 
 
-### Redshift tables description:
+### Redshift tables marks:
 **Design:** 
 
 The data distribution style for the tables has been set to DISTSTYLE = AUTO so Redshift assigns an optimal 
@@ -95,7 +95,7 @@ $ python3 create_tables.py
 $ python3 etl.py
 ```
 
-- Verify/test the results (**analytics dashboard**) using jupyter notebook:
+- Verify/test the results with **analytics & dashboards** (using Jupyter Notebook):
 
 ```
 $ jupyter notebook  # launches app/browser/localhost with the project files
