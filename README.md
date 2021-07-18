@@ -1,8 +1,8 @@
 # Data Warehouse with Amazon Redshift
 ### Project overview
 **Sparkify** is a newness music company looking to provide a great service to the community that enjoys its music 
-operating system. Its business is expanding on a large scale; the response to this scenario is the infrastructure as 
-code (IaC); Sparkify is looking for a shift of the operations to cloud services and data warehousing regarding 
+operating system. Its business is expanding on a large scale; the response to this scenario is the **infrastructure as 
+code** (IaC); Sparkify is looking for a shift of the operations to cloud services and data warehousing regarding 
 product scalability and flexibility. 
 
 At this point the company stores a collection of complex event data and metadata (JSON format) about all music usage and 
@@ -52,18 +52,18 @@ sparkify-postgres
 
 
 ### Redshift tables marks:
-**Design:** 
+<span style="color:blue">**Design**</span>: 
 
 The data distribution style for the tables has been set to DISTSTYLE = AUTO so Redshift assigns an optimal 
 distribution style based on the size of the table data.
 
-**Keys:** 
+<span style="color:blue">**Keys**</span>:  
 
-DISTKEY: choice was made considering the column that appears in most/bigger JOINs. The value in the DISTKEY column 
+*DISTKEY*: choice was made considering the column that appears in most/bigger JOINs. The value in the DISTKEY column 
 is hashed and values are distributed based on the hash (this value is used to distribute the data over any available 
 slices). 
 
-SORTKEY: choice was made considering the column more useful to sort rows in each slice; therefore the primary key of 
+*SORTKEY*: choice was made considering the column more useful to sort rows in each slice; therefore the primary key of 
 the *dimension tables* was used as SORTKEY. 
 
 In the *fact table* the DISTKEY and SORTKEY were set to be the same join-column so the query optimizer/Redshift uses 
@@ -82,8 +82,10 @@ $ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-Using AWS services create an IAM user (with administrator privileges) and add its security credential values (ACCESS & 
-SECRET KEYS) to the Redshift configuration file (dwh.cfg).
+Using AWS services create an **IAM user** (with administrator privileges) and add its security credential values 
+(<span style="color:blue">ACCESS & SECRET KEYS</span>) to the Redshift configuration file (dwh.cfg).
+
+- ```sql_queries.py``` contains sql statements to deal with staging & production tables.
 
 - To create the pipeline:
 
